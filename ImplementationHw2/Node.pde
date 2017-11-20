@@ -15,16 +15,18 @@ public class Node {
   public Region region;
   public Segment[] segmentsList;
   private int size;
-  private Node NW, SW, SE, NE;
+  private Node[] children;
 
   Node (int x1, int y1, int x2, int y2) {
     this.region = new Region(x1, y1, x2, y2);
-    segmentsList = new Segment[SEGMENT_LIMIT + 1];
+    
+    segmentsList = new Segment [SEGMENT_LIMIT + 1];
     size = 0;
-    NW = null;
-    SW = null;
-    SE = null;
-    SW = null;
+    
+    children = new Node[4];
+    for (int i = 0; i < children.length; i++) {
+      children[i] = null;
+    }
   }
   
   // Adds a segment to the list of segments
@@ -38,10 +40,10 @@ public class Node {
 
   // Returns true if node is a leaf, otherwise false
   public boolean isLeaf() {
-    return   NW == null &&
-             SW == null && 
-             SE == null && 
-             NE== null;
+    return   children[0] == null &&
+             children[1] == null && 
+             children[2] == null && 
+             children[3]== null;
   }
   
   // Clears the highlight from region and segments

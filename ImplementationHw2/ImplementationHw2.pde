@@ -96,10 +96,10 @@ void drawTree(Node v) {
       
   v.drawMe();
     
-  drawTree(v.NW);
-  drawTree(v.SW);
-  drawTree(v.SE);
-  drawTree(v.NE);
+  drawTree(v.children[0]);
+  drawTree(v.children[1]);
+  drawTree(v.children[2]);
+  drawTree(v.children[3]);
 }
 
 ///////////////////////////////////////////////////////////
@@ -155,10 +155,10 @@ void clearHighlights(Node v) {
 
   v.clearHighlighted();
   if (!v.isLeaf()) {
-    clearHighlights(v.NW);
-    clearHighlights(v.SW);
-    clearHighlights(v.SE);
-    clearHighlights(v.NE);
+    clearHighlights(v.children[0]);
+    clearHighlights(v.children[1]);
+    clearHighlights(v.children[2]);
+    clearHighlights(v.children[3]);
   }
 }
 

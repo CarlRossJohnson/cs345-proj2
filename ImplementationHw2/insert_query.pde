@@ -25,10 +25,10 @@ public void insert(Segment s, Node v) {
     return;
 
   if (!v.isLeaf()) {
-    insert(s, v.NW);
-    insert(s, v.SW);
-    insert(s, v.SE);
-    insert(s, v.NE);
+    insert(s, v.children[0]);
+    insert(s, v.children[1]);
+    insert(s, v.children[2]);
+    insert(s, v.children[3]);
   }
   else {
     v.addSegment(s);
@@ -51,21 +51,21 @@ public void split(Node v) {
   int midX = (v.region.p1.x + v.region.p2.x) / 2;
   int midY = (v.region.p1.y + v.region.p2.y) / 2;
 
-  v.NW = new Node(v.region.p1.x, v.region.p1.y, midX, midY);
+  v.children[0] = new Node(v.region.p1.x, v.region.p1.y, midX, midY);
 
-  v.SW = new Node(v.region.p1.x, midY + 1, midX, v.region.p2.y);
+  v.children[1] = new Node(v.region.p1.x, midY + 1, midX, v.region.p2.y);
 
-  v.SE = new Node(midX + 1, midY + 1, v.region.p2.x, v.region.p2.y);
+  v.children[2] = new Node(midX + 1, midY + 1, v.region.p2.x, v.region.p2.y);
 
-  v.NE = new Node(midX + 1, v.region.p1.y, v.region.p2.x, midY);
+  v.children[3] = new Node(midX + 1, v.region.p1.y, v.region.p2.x, midY);
   
   totalNodes += 4;
 
   for (int i = 0; i < v.segmentsList.length; i++) {
-    insert(v.segmentsList[i], v.NW);
-    insert(v.segmentsList[i], v.SW);
-    insert(v.segmentsList[i], v.SE);
-    insert(v.segmentsList[i], v.NE);
+    insert(v.segmentsList[i], v.children[0]);
+    insert(v.segmentsList[i], v.children[1]);
+    insert(v.segmentsList[i], v.children[2]);
+    insert(v.segmentsList[i], v.children[3]);
   }
 }
 
@@ -79,10 +79,10 @@ void query(Region Q, Node v) {
     return;
 
   if (Q.contains(v.region)) {
-    query(Q, v.NW);
-    query(Q, v.SW);
-    query(Q, v.SE);
-    query(Q, v.NE);
+    query(Q, v.children[0]);
+    query(Q, v.children[1]);
+    query(Q, v.children[2]);
+    query(Q, v.children[3]);
   }
   else if (v.isLeaf()) {
     for (int i = 0; i < v.size; i++) {
@@ -91,9 +91,9 @@ void query(Region Q, Node v) {
     }
   }
   else {
-    query(Q, v.NW);
-    query(Q, v.SW);
-    query(Q, v.SE);
-    query(Q, v.NE);
+    query(Q, v.children[0]);
+    query(Q, v.children[1]);
+    query(Q, v.children[2]);
+    query(Q, v.children[3]);
   }
 }
