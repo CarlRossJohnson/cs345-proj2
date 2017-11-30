@@ -31,7 +31,21 @@ public void insert(Segment s, Node v) {
     insert(s, v.children[3]);
   }
   else {
+    if (insertMode) {
+      for (int i = 0; i < v.size; i++) {
+        if (s.y == v.segmentsList[i].y &&
+             ((s.x1 >= v.segmentsList[i].x1 &&
+             s.x1 <= v.segmentsList[i].x2) ||
+            (s.x2 >= v.segmentsList[i].x1 &&
+            s.x2 <= v.segmentsList[i].x2))) {
+              javax.swing.JOptionPane.showMessageDialog(null, 
+              "A segment already exists at that location " + s.y + " " + s.x1);
+              return;
+            }
+      }
+    }
     v.addSegment(s);
+    
     // TODO: Highlight region temporarily
     if (v.size > SEGMENT_LIMIT && 
         v.region.p1.x < v.region.p2.x &&

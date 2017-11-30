@@ -10,7 +10,8 @@
 
 final int SEGMENT_LIMIT = 3;
 
-Node root = new Node(0, 0, 512, 512);
+Node root;
+int gridSize;
 int numberOfSegments = 0;
 int totalNodes = 1;
 Region Q = null;
@@ -18,7 +19,7 @@ Region Q = null;
 Button readFileButton;
 Button startButton;
 
-String fileName = "Fresh Start";
+String fileName = "";
 String animationStatus = "";
 public final int highlightTime = 2500; //2.5 seconds. Used in classes that do drawing
 
@@ -46,10 +47,9 @@ void setup() {
   size(512, 576);
   smooth();
   textSize(16);
-  
+
   readFileButton = new Button("Read File", 8, 545, 100, 24);
   startButton = new Button("Start", 205, 400, 90, 35);
-  
 } //END setup
 
 void draw() {
@@ -80,23 +80,31 @@ void draw() {
   // Draw panels
   noStroke();
   smooth();
-  fill(64, 64, 64);
+
+  fill(0);
   rect(0, 0, 511, 511);
+
+  if (root != null) {
+    fill(64, 64, 64);
+    rect(0, 0, gridSize - 1, gridSize - 1);
+  }
+
   fill(0);
   rect(0, 512, 512, 64);
-  
+
   textSize(14);
-  
+
   updateStatusBar();
-  
-  text(fileName, 12, 520, width, height);
-  
-  readFileButton.drawButton(218, 218, 218);
-  
- 
+
+  if (root == null) 
+    readFileButton.drawButton(218, 218, 218);
+  else 
+    text("File: " + fileName, 12, 520, width, height);
+
+
   //Highlighting and Drawing
   drawTree(root);
-  
+
   if (reportMode && firstClickDone && secondClickDone) {
     Q = new Region(firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y);
     root.checkForHighlight(Q);
@@ -104,16 +112,14 @@ void draw() {
     secondClickDone = false;
     QStartTime = (int) System.currentTimeMillis();
   }
-  
+
   if (Q != null) {
     QcurrTime = (int) System.currentTimeMillis();
     Q.drawQuery();
     if ((QcurrTime-QStartTime)>highlightTime) {
       Q = null;
     }
-
   }
-  
 } //END draw
 
 // Draws Status Bar elements
@@ -131,7 +137,7 @@ String animationStatus() {
   if (animation)
     return"ON";
   else 
-    return "OFF";
+  return "OFF";
 }
 
 // Returns a string indicating current mode
@@ -146,10 +152,10 @@ String currMode() {
 // Draws all regions and segments of our Quad Tree
 void drawTree(Node v) {
   if (v == null)
-      return;
-      
+    return;
+
   v.drawMe(animation);
-    
+
   drawTree(v.children[0]);
   drawTree(v.children[1]);
   drawTree(v.children[2]);
@@ -178,8 +184,13 @@ void readFile() {
   }
   String line;
   try {
-    String[] coordinates;
+    if ((line = reader.readLine()) != null) {
+      int treeHeight = Integer.parseInt(line.trim()); 
+      gridSize = ((int) pow(2, treeHeight));
+      root = new Node(0, 0, gridSize, gridSize);
+    }
 
+    String[] coordinates;
     while ((line = reader.readLine()) != null) {
       coordinates = line.trim().split(",");
       if (coordinates.length < 3)
@@ -226,23 +237,27 @@ void clearHighlights(Node v) {
  * Description: Listens for key presses 
  *******************************************************************************/
 void keyPressed() {
-  
+
   if (key == 'a') {
     animation = !animation;
   } else if (key == 'i') {
-    if (!reportMode)
-      insertMode = !insertMode;
-    else 
-      javax.swing.JOptionPane.showMessageDialog(null, "You must exit Report Mode first");
-    
-  } else if (key == 'r') {
-    if (!insertMode) {
+    if (root != null) {
       if (!reportMode)
-        javax.swing.JOptionPane.showMessageDialog(null, "Report Mode on. Click on screen for points");
-      reportMode = !reportMode;
-    }
-    else 
+        insertMode = !insertMode;
+      else 
+      javax.swing.JOptionPane.showMessageDialog(null, "You must exit Report Mode first");
+    } else 
+      javax.swing.JOptionPane.showMessageDialog(null, "You must read in a file first");
+  } else if (key == 'r') {
+    if (root != null) {
+      if (!insertMode) {
+        if (!reportMode)
+          javax.swing.JOptionPane.showMessageDialog(null, "Report Mode on. Click on screen for points");
+        reportMode = !reportMode;
+      } else 
       javax.swing.JOptionPane.showMessageDialog(null, "You must exit Insert Mode first");
+    } else 
+      javax.swing.JOptionPane.showMessageDialog(null, "You must read in a file first");
   }
 }
 
@@ -252,37 +267,37 @@ void keyPressed() {
  * Description: Listens for mouse presses 
  *******************************************************************************/
 void mousePressed() {
-    if (onStart) {
-      if (startButton.mouseOver())
-        onStart = false;
-      return; 
-    }
-  
-    // user presses "Read File"
-    if (readFileButton.mouseOver()) {
+  if (onStart) {
+    if (startButton.mouseOver())
+      onStart = false;
+    return;
+  }
+
+  // user presses "Read File"
+  if (readFileButton.mouseOver()) {
+    if (root == null) {
       fileName = javax.swing.JOptionPane.showInputDialog(null, "Enter input filename:");
       if (fileName != null) {
         readFile();
       } else 
-          fileName = "Fresh Start";
-    } else if (insertMode && root.region.contains(mouseX, mouseY)) {  //Inserting point
-      Segment segment = new Segment(mouseX, mouseX, mouseY);
-      insert(segment, root);
-      numberOfSegments++;
-      if (animation) {
-        root.checkForHighlight(segment);
-      }
-    } else if (reportMode && root.region.contains(mouseX, mouseY)) {  //Reporting Query
-      if (!firstClickDone) {
-        firstClickDone = true;
-        firstPoint = new Point(mouseX, mouseY);
-        javax.swing.JOptionPane.showMessageDialog(null, "BOTTOM LEFT point set");
-      }
-      else if (!secondClickDone) {
-        secondClickDone = true;
-        secondPoint = new Point(mouseX, mouseY);
-        javax.swing.JOptionPane.showMessageDialog(null, "TOP RIGHT point set");
-      }
+        fileName = "";
     }
-    
+  } else if (insertMode && root.region.contains(mouseX, mouseY)) {  //Inserting point
+    Segment segment = new Segment(mouseX, mouseX, mouseY);
+    insert(segment, root);
+    numberOfSegments++;
+    if (animation) {
+      root.checkForHighlight(segment);
+    }
+  } else if (reportMode && root.region.contains(mouseX, mouseY)) {  //Reporting Query
+    if (!firstClickDone) {
+      firstClickDone = true;
+      firstPoint = new Point(mouseX, mouseY);
+      javax.swing.JOptionPane.showMessageDialog(null, "BOTTOM LEFT point set");
+    } else if (!secondClickDone) {
+      secondClickDone = true;
+      secondPoint = new Point(mouseX, mouseY);
+      javax.swing.JOptionPane.showMessageDialog(null, "TOP RIGHT point set");
+    }
+  }
 }
