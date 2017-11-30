@@ -10,6 +10,7 @@
 public class Segment {
   public int x1, x2, y;
   private boolean highlighted;
+  private int startTime;
 
   public Segment(int x1, int x2, int y) {
     if (x1 <= x2) {
@@ -25,6 +26,10 @@ public class Segment {
 
   // Draws a line representing this segment
   public void drawMe() {
+    int currentTime= (int) System.currentTimeMillis();
+    if ((currentTime-startTime)>highlightTime)
+     setHighlighted(false); 
+   
     stroke(256, 256, 256);
     if (isHighlighted())
       strokeWeight(3);
@@ -36,6 +41,7 @@ public class Segment {
   // Sets highlighted
   public void setHighlighted(boolean enabled) {
     this.highlighted = enabled;
+    this.startTime = (int) System.currentTimeMillis();
   }
 
   // Returns true if segment is highlighted,

@@ -2,7 +2,8 @@
  * Author:  Kyle Block
  *          Carl Johnson
  * 
- * Description: A graphical program to display the 
+ * Description: A graphical program to display quadrees when given segments through a file or points
+ *                through user interaction.
  *
  *--------------------------------------------------------------------------------------------*/
 
@@ -15,15 +16,30 @@ int totalNodes = 1;
 Region Q = null;
 
 Button readFileButton;
+Button startButton;
 
 String fileName = "Fresh Start";
 String animationStatus = "";
+public final int highlightTime = 2500; //2.5 seconds. Used in classes that do drawing
 
 boolean gettingInput;
 boolean insertMode = false;
 boolean reportMode = false;
-boolean animation = false;
+boolean animation = true;
 
+boolean firstClickDone = false;
+boolean secondClickDone = false;
+Point firstPoint;
+Point secondPoint;
+private int QStartTime;
+private int QcurrTime;
+
+boolean onStart = true;
+int frame = 0;
+int startX = 150;
+int startY = 100;
+int len = 200;
+Node startNode = new Node(startX, startY, startX+len, startY+len);
 
 
 void setup() {
@@ -32,11 +48,35 @@ void setup() {
   textSize(16);
   
   readFileButton = new Button("Read File", 8, 545, 100, 24);
+  startButton = new Button("Start", 205, 400, 90, 35);
   
 } //END setup
 
 void draw() {
-  
+  if (onStart) {
+    frame++;
+    if (frame%30 == 0)
+      startSplit(startNode);
+    if (frame%180 == 0) {
+      startNode = new Node(startX, startY, startX+len, startY+len);
+      frame = 0;
+      delay(500);
+    }
+    rect(0, 0, width, height);
+    textAlign(LEFT, TOP);
+    noFill();
+    strokeWeight(3);
+    stroke(0, 0, 0);
+    drawTree(startNode);
+    fill(83, 0, 132);
+    textSize(46);
+    text("Quad Trees", 130, 40);
+    textSize(20);
+    text("Carl Johnson", 190, 320);
+    text("Kyle Block", 200, 360);
+    startButton.drawButton(218, 218, 218);
+    return;
+  }
   // Draw panels
   noStroke();
   smooth();
@@ -53,11 +93,25 @@ void draw() {
   
   readFileButton.drawButton(218, 218, 218);
   
+ 
+  //Highlighting and Drawing
   drawTree(root);
   
+  if (reportMode && firstClickDone && secondClickDone) {
+    Q = new Region(firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y);
+    root.checkForHighlight(Q);
+    firstClickDone = false;
+    secondClickDone = false;
+    QStartTime = (int) System.currentTimeMillis();
+  }
+  
   if (Q != null) {
-    Q.setHighlighted(true);
-    stroke(0, 0, 256);
+    QcurrTime = (int) System.currentTimeMillis();
+    Q.drawQuery();
+    if ((QcurrTime-QStartTime)>highlightTime) {
+      Q = null;
+    }
+
   }
   
 } //END draw
@@ -94,7 +148,7 @@ void drawTree(Node v) {
   if (v == null)
       return;
       
-  v.drawMe();
+  v.drawMe(animation);
     
   drawTree(v.children[0]);
   drawTree(v.children[1]);
@@ -182,8 +236,11 @@ void keyPressed() {
       javax.swing.JOptionPane.showMessageDialog(null, "You must exit Report Mode first");
     
   } else if (key == 'r') {
-    if (!insertMode)
+    if (!insertMode) {
+      if (!reportMode)
+        javax.swing.JOptionPane.showMessageDialog(null, "Report Mode on. Click on screen for points");
       reportMode = !reportMode;
+    }
     else 
       javax.swing.JOptionPane.showMessageDialog(null, "You must exit Insert Mode first");
   }
@@ -195,6 +252,12 @@ void keyPressed() {
  * Description: Listens for mouse presses 
  *******************************************************************************/
 void mousePressed() {
+    if (onStart) {
+      if (startButton.mouseOver())
+        onStart = false;
+      return; 
+    }
+  
     // user presses "Read File"
     if (readFileButton.mouseOver()) {
       fileName = javax.swing.JOptionPane.showInputDialog(null, "Enter input filename:");
@@ -202,9 +265,24 @@ void mousePressed() {
         readFile();
       } else 
           fileName = "Fresh Start";
-    } else if (insertMode && root.region.contains(mouseX, mouseY)) {
+    } else if (insertMode && root.region.contains(mouseX, mouseY)) {  //Inserting point
       Segment segment = new Segment(mouseX, mouseX, mouseY);
       insert(segment, root);
       numberOfSegments++;
+      if (animation) {
+        root.checkForHighlight(segment);
+      }
+    } else if (reportMode && root.region.contains(mouseX, mouseY)) {  //Reporting Query
+      if (!firstClickDone) {
+        firstClickDone = true;
+        firstPoint = new Point(mouseX, mouseY);
+        javax.swing.JOptionPane.showMessageDialog(null, "BOTTOM LEFT point set");
+      }
+      else if (!secondClickDone) {
+        secondClickDone = true;
+        secondPoint = new Point(mouseX, mouseY);
+        javax.swing.JOptionPane.showMessageDialog(null, "TOP RIGHT point set");
+      }
     }
+    
 }

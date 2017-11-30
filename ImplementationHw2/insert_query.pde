@@ -69,6 +69,25 @@ public void split(Node v) {
   }
 }
 
+//Spliting node for start screen
+public void startSplit(Node v) {
+  if (!v.isLeaf()) {
+    startSplit(v.children[0]);
+    startSplit(v.children[1]);
+    startSplit(v.children[2]);
+    startSplit(v.children[3]);
+  }
+  else {
+    int midX = (v.region.p1.x + v.region.p2.x) / 2;
+    int midY = (v.region.p1.y + v.region.p2.y) / 2;
+  
+    v.children[0] = new Node(v.region.p1.x, v.region.p1.y, midX, midY);
+    v.children[1] = new Node(v.region.p1.x, midY + 1, midX, v.region.p2.y);
+    v.children[2] = new Node(midX + 1, midY + 1, v.region.p2.x, v.region.p2.y);
+    v.children[3] = new Node(midX + 1, v.region.p1.y, v.region.p2.x, midY);
+  }
+}
+
 /*******************************************************************************
  * query()
  *

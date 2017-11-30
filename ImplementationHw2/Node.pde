@@ -58,11 +58,57 @@ public class Node {
   
   // Draws the region. 
   // If node if a leaf, also draws segments
-  public void drawMe() {
-    region.drawMe();
+  public void drawMe(boolean animate) {
+    if (onStart)
+      region.startScreenDrawMe();
+    else
+      region.drawMe(animate);
     if (isLeaf()) {
       for (int i = 0; i < size; i++) {
         segmentsList[i].drawMe();
+      }
+    }
+  }
+  
+  
+  //Checks itself for contained region, and its children
+  //If the this node contains region, set highlight to true
+  public void checkForHighlight(Segment s) {
+    if (region.contains(s))
+      region.setHighlighted(true);
+    else
+      return;
+      
+    if (!isLeaf()) {
+      children[0].checkForHighlight(s);
+      children[1].checkForHighlight(s);
+      children[2].checkForHighlight(s);
+      children[3].checkForHighlight(s);
+    }
+  }
+  
+  //Checks itself for contained region, and its children
+  //If the this node contains region, set highlight to true
+  //Also if any of the any segments are in the region, it sets their highlight to true
+  public void checkForHighlight(Region r) {
+    if (region.overlaps(r)) {
+      if (animation)
+        region.setHighlighted(true);
+    }
+    else
+      return;
+    
+    if (!isLeaf()) {
+      children[0].checkForHighlight(r);
+      children[1].checkForHighlight(r);
+      children[2].checkForHighlight(r);
+      children[3].checkForHighlight(r);
+    }
+    else {
+      for (int i = 0; i < size; i++) {
+        if (r.contains(segmentsList[i])) {
+          segmentsList[i].setHighlighted(true);
+        }
       }
     }
   }

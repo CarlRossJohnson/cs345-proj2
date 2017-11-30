@@ -11,6 +11,7 @@ public class Region {
 
   public Point p1, p2;
   private boolean highlighted;
+  private int startTime;
 
   // Constructor: Standardizes p1 and p2 
   // positions relative to each other
@@ -45,6 +46,7 @@ public class Region {
       }
     }
   }
+  
 
   // Returns true if region contains point (x,y),
   // otherwise false
@@ -94,12 +96,37 @@ public class Region {
   }
   
   // Draws a rectangle representing this region
-  public void drawMe() {
-    if (isHighlighted())
+  public void drawMe(boolean animate) {
+    int currentTime= (int) System.currentTimeMillis();
+    if ((currentTime-startTime)>highlightTime)
+     setHighlighted(false); 
+   
+    if (isHighlighted() && animate) {
       strokeWeight(3);
-    else
+      stroke(255, 255, 0);
+    }
+    else {
       strokeWeight(1);
-    stroke(192, 192, 0);
+      stroke(150, 150, 0);
+    }
+    
+    noFill();
+    rect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+  }
+  
+  //DrawMe for intro screen
+  public void startScreenDrawMe() {
+    strokeWeight(3);
+    stroke(0, 0, 0);
+    noFill();
+    rect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+  }
+  
+  //drawMe specifically for the report query
+  public void drawQuery() {
+    strokeWeight(3);
+    stroke(0, 0, 200);
+    
     noFill();
     rect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
   }
@@ -107,7 +134,9 @@ public class Region {
   // Sets highlighted
   public void setHighlighted(boolean enabled) {
     this.highlighted = enabled;
+    this.startTime = (int) System.currentTimeMillis();
   }
+  
 
   // Returns true if region is highlighted,
   // otherwise false
