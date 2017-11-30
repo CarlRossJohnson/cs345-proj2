@@ -106,7 +106,7 @@ public class Node {
     }
     else {
       for (int i = 0; i < size; i++) {
-        if (r.contains(segmentsList[i])) {
+        if (r.overlaps(segmentsList[i])) {
           segmentsList[i].setHighlighted(true);
         }
       }
