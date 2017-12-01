@@ -37,7 +37,7 @@ public void insert(Segment s, Node v) {
           s.x1 >= v.segmentsList[i].x1 &&
           s.x2 <= v.segmentsList[i].x2) {
             javax.swing.JOptionPane.showMessageDialog(null, 
-            "A segment already exists at that location" + s.y + " " + s.x1);
+            "A segment already exists at that location");
             return;
           }
     }
